@@ -1,0 +1,20 @@
+# Virtual environment
+.venv/
+
+# Compiled files
+__pycache__/
+
+# Document files
+*.docx
+*.pdf
+
+# Data files
+*.csv
+
+# Ignore data directories
+data/reports/
+data/test/
+data/training/
+
+# Ignore Claude AI files
+.claude/  
