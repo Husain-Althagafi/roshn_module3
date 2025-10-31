@@ -15,6 +15,7 @@ __pycache__/
 data/reports/
 data/test/
 data/training/
+data/*.json
 
 # Ignore Claude AI files
 .claude/  

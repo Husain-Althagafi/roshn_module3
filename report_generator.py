@@ -183,15 +183,22 @@ class ReportGenerator:
         # Create table data
         data = [['#', 'Task Description', 'Location', 'Crew']]
 
+        # Create a smaller font style for table cells
+        cell_style = ParagraphStyle('CellStyle', parent=self.normal_style, fontSize=9, leading=11)
+
         for i, task in enumerate(extraction.completed_tasks, 1):
+            # Use Paragraph for task description to enable wrapping
+            task_para = Paragraph(task.task_name[:200] + ('...' if len(task.task_name) > 200 else ''), cell_style)
+
             data.append([
                 str(i),
-                task.task_name[:100] + ('...' if len(task.task_name) > 100 else ''),
+                task_para,
                 task.location or '-',
                 task.crew or '-'
             ])
 
-        table = Table(data, colWidths=[0.4 * inch, 3.5 * inch, 1.3 * inch, 1.3 * inch])
+        # Adjusted column widths: wider Location and Crew columns
+        table = Table(data, colWidths=[0.3 * inch, 3.4 * inch, 1.4 * inch, 1.4 * inch])
         table.setStyle(TableStyle([
             # Header
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#27ae60')),
@@ -204,6 +211,8 @@ class ReportGenerator:
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f1f8f4')]),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            # Enable word wrapping
+            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(table)
 
@@ -219,14 +228,18 @@ class ReportGenerator:
         # Create table data
         data = [['#', 'Issue Description', 'Cause']]
 
+        cell_style = ParagraphStyle('CellStyle', parent=self.normal_style, fontSize=9, leading=11)
+
         for i, blocker in enumerate(extraction.blockers, 1):
+            issue_para = Paragraph(blocker.issue[:200] + ('...' if len(blocker.issue) > 200 else ''), cell_style)
+
             data.append([
                 str(i),
-                blocker.issue[:150] + ('...' if len(blocker.issue) > 150 else ''),
+                issue_para,
                 blocker.cause or 'Unknown'
             ])
 
-        table = Table(data, colWidths=[0.4 * inch, 4.5 * inch, 1.6 * inch])
+        table = Table(data, colWidths=[0.3 * inch, 4.4 * inch, 1.8 * inch])
         table.setStyle(TableStyle([
             # Header
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e67e22')),
@@ -239,6 +252,7 @@ class ReportGenerator:
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fef5e7')]),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(table)
 
@@ -254,15 +268,19 @@ class ReportGenerator:
         # Create table data
         data = [['#', 'Type', 'Description', 'Severity']]
 
+        cell_style = ParagraphStyle('CellStyle', parent=self.normal_style, fontSize=9, leading=11)
+
         for i, incident in enumerate(extraction.incidents, 1):
+            desc_para = Paragraph(incident.description[:180] + ('...' if len(incident.description) > 180 else ''), cell_style)
+
             data.append([
                 str(i),
                 incident.incident_type.title(),
-                incident.description[:120] + ('...' if len(incident.description) > 120 else ''),
+                desc_para,
                 incident.severity or 'Unknown'
             ])
 
-        table = Table(data, colWidths=[0.4 * inch, 1 * inch, 3.8 * inch, 1.3 * inch])
+        table = Table(data, colWidths=[0.3 * inch, 0.9 * inch, 3.9 * inch, 1.4 * inch])
         table.setStyle(TableStyle([
             # Header
             ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#e74c3c')),
@@ -275,6 +293,7 @@ class ReportGenerator:
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#fadbd8')]),
             ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('WORDWRAP', (0, 0), (-1, -1), True),
         ]))
         elements.append(table)
 

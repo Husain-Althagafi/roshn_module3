@@ -243,21 +243,29 @@ class DailyLogExtractor:
         text = doc.text
 
         # Look for incident header patterns (like "SAFETY INCIDENT - MAJOR:")
-        # Use word boundaries and more specific patterns to avoid false positives
-        incident_header_pattern = r"\bSAFETY\s+INCIDENT\b[\s\-:]*(\w+)?[:\s]*(.+?)(?=\n\n|Additionally:|Crew count|\Z)"
+        # Match from "SAFETY INCIDENT" until we hit a paragraph break or blocker section
+        incident_header_pattern = r"\bSAFETY\s+INCIDENT\b[\s\-:]*(\w+)?:?\s*(.+?)(?=\n\n(?:Additionally|Crew count)|\Z)"
         matches = list(re.finditer(incident_header_pattern, text, re.IGNORECASE | re.DOTALL))
 
-        # De-duplicate: if one match is contained in another, keep only the longer one
+        # De-duplicate: Remove matches that are just section headers without content
         final_matches = []
-        for i, match in enumerate(matches):
-            is_substring = False
-            for j, other_match in enumerate(matches):
-                if i != j and len(match.group(0)) < len(other_match.group(0)):
-                    # Check if this match is substring of a longer match
-                    if match.group(0).strip() in other_match.group(0):
-                        is_substring = True
+        for match in matches:
+            match_text = match.group(0).strip()
+
+            # Skip if it's just the header line with minimal description
+            # A real incident should have at least 80 characters
+            if len(match_text) < 80:
+                continue
+
+            # Check if this match is a substring of another match
+            is_duplicate = False
+            for other_match in matches:
+                if match != other_match:
+                    if match_text in other_match.group(0) and len(match_text) < len(other_match.group(0)):
+                        is_duplicate = True
                         break
-            if not is_substring:
+
+            if not is_duplicate:
                 final_matches.append(match)
 
         for match in final_matches:
@@ -288,14 +296,18 @@ class DailyLogExtractor:
         for sent in sentences:
             sent_text = sent.text.lower()
 
-            # Skip if already part of a detected incident
-            if any(sent.text in inc.description for inc in incidents):
+            # Skip if already part of a detected incident block
+            if any(sent.text.strip() in inc.description for inc in incidents):
                 continue
 
             # Skip generic headers or metadata
             if sent_text.strip() in ["incidents and issues:", "incidents:", "incident and issues"]:
                 continue
             if "crew count" in sent_text or "operations continue" in sent_text:
+                continue
+
+            # Skip if sentence contains "SAFETY INCIDENT" (these should be caught by block detection)
+            if "safety incident" in sent_text or "incident -" in sent_text:
                 continue
 
             # Check each incident category
