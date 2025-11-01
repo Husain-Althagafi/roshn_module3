@@ -4,7 +4,7 @@
 
 ---
 
-## <� Overview
+##  Overview
 
 Module 3 of the ROSHN PULSE MVP is an automated reporting engine that uses Natural Language Processing (NLP) to extract structured data from unstructured construction daily logs.
 
